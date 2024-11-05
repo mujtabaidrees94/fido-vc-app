@@ -1,0 +1,3 @@
+[submodule "fido-vc-webauthn"]
+	path = fido-vc-webauthn
+	url = https://github.com/mujtabaidrees94/fido-vc-webauthn.git
