@@ -6,6 +6,7 @@ import config from '../config.json';
 import {router as passkeyRoutes} from './routes/routes';
 import session from 'express-session';
 import dotenv from 'dotenv';
+import { origin } from './utils/constants';
 
 dotenv.config();
 
@@ -35,15 +36,17 @@ app.use(
       cookie: {
         maxAge: 86400000,
         httpOnly: true, // Ensure to not expose session cookies to clientside scripts
+        sameSite: 'lax',
+        secure: false,
       },
-
     }),
 );
 
 // Handle logs in console during development
 if (process.env.NODE_ENV === 'development' || config.NODE_ENV === 'development') {
   app.use(morgan('dev'));
-  app.use(cors());
+  // Enable CORS with credentials for local development
+  app.use(cors({ origin, credentials: true }));
 }
 
 // Handle security and origin in production
