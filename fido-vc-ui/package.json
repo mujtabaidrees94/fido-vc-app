@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.1.3",
+    "@radix-ui/react-icons": "^1.3.2",
     "@radix-ui/react-label": "^2.1.1",
     "@radix-ui/react-scroll-area": "^1.2.2",
     "@radix-ui/react-slot": "^1.1.1",
@@ -17,8 +18,10 @@
     "@simplewebauthn/browser": "file:../fido-vc-webauthn/packages/browser",
     "bs58": "^6.0.0",
     "class-variance-authority": "^0.7.0",
+    "install": "^0.13.0",
     "lucide-react": "^0.453.0",
     "next": "^15.0.0",
+    "npm": "^11.0.0",
     "react": "^19.0.0-rc-65a56d0e-20241020",
     "react-dom": "^19.0.0-rc-65a56d0e-20241020",
     "tailwind-merge": "^2.5.4"

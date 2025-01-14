@@ -47,7 +47,7 @@ export const handleRegisterStart = async (req: Request, res: Response, next: Nex
 
 export const handleRegisterFinish = async (req: Request, res: Response, next: NextFunction) => {
     console.log("here");
-    const {body} = req;
+    const {credential, did} = req.body;
     const {currentChallenge, loggedInUserId} = req.session;
 
     if (!loggedInUserId) {
@@ -60,7 +60,7 @@ export const handleRegisterFinish = async (req: Request, res: Response, next: Ne
 
     try {
         const verification = await verifyRegistrationResponse({
-            response: body as RegistrationResponseJSON,
+            response: credential as RegistrationResponseJSON,
             expectedChallenge: currentChallenge,
             expectedOrigin: origin,
             expectedRPID: rpID,
@@ -70,15 +70,16 @@ export const handleRegisterFinish = async (req: Request, res: Response, next: Ne
         if (verification.verified && verification.registrationInfo) {
             const {credentialPublicKey, credentialID, counter} = verification.registrationInfo;
 
-            const transportsString = JSON.stringify(body.response.transports)
+            const transportsString = JSON.stringify(credential.response.transports)
 
             await credentialService.saveNewCredential(
                 loggedInUserId,
                 uint8ArrayToBase64(credentialID),
                 uint8ArrayToBase64(credentialPublicKey),
+                did,
                 counter,
                 transportsString);
-            res.send({verified: true});
+            res.send({verified: true, did});
         } else {
             next(new CustomError('Verification failed', 400));
         }

@@ -9,44 +9,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react'
-
-import bs58 from 'bs58';
-
-// Convert a Base64URL string to a Uint8Array
-function base64URLToUint8Array(base64UrlString: string): Uint8Array {
-  // Add padding if needed
-  const padding = base64UrlString.length % 4;
-  if (padding) {
-    base64UrlString += '='.repeat(4 - padding);
-  }
-
-  // Convert Base64URL to Base64
-  const base64String = base64UrlString
-    .replace(/-/g, '+')  // Replace '-' with '+'
-    .replace(/_/g, '/')  // Replace '_' with '/'
-  
-  // Decode the Base64 string to a Uint8Array
-  const binaryString = atob(base64String);
-  const byteArray = new Uint8Array(binaryString.length);
-
-  for (let i = 0; i < binaryString.length; i++) {
-    byteArray[i] = binaryString.charCodeAt(i);
-  }
-
-  return byteArray;
-}
-
-
-function encodePublicKeyToDID(publicKey: string): string {
-  // Simplified example for Base58 encoding (you might need a library like `bs58`):
-  return `did:key:${bs58.encode(base64URLToUint8Array(publicKey))}`;
-}
-
+import { useRouter } from 'next/navigation';
+import { encodePublicKeyToDID } from '@/lib/fido-did-lib'
 
 export default function PasskeyDemo() {
   const [username, setUsername] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+  const router = useRouter();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -67,19 +37,18 @@ export default function PasskeyDemo() {
 
       const did = encodePublicKeyToDID(credential.response.publicKey || '');
 
-      console.log(did);
-
       const registerFinishResponse = await fetch('http://localhost:8080/api/passkey/registerFinish', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credential),
+        body: JSON.stringify({credential, did}),
       })
 
       const registerFinishData = await registerFinishResponse.json()
 
       if (registerFinishData.verified) {
         setMessage({ type: 'success', text: 'Registration successful! You can now log in.' })
+        localStorage.setItem(`walletDid-${username}`, did);
       } else {
         setMessage({ type: 'error', text: 'Registration failed. Please try again.' })
       }
@@ -118,7 +87,14 @@ export default function PasskeyDemo() {
       const loginFinishData = await loginFinishResponse.json()
 
       if (loginFinishData.verified) {
-        setMessage({ type: 'success', text: 'Login successful!' })
+        if(loginFinishData.did===localStorage.getItem(`walletDid-${username}`)) {
+          localStorage.setItem('loginDid', loginFinishData.did)
+          localStorage.setItem('loginUsername', loginFinishData.username)
+          setMessage({ type: 'success', text: 'Login successful!' })
+          router.push('/home'); 
+        } else {
+          setMessage({ type: 'error', text: 'Login failed. The DID at server didnt match with wallet DID' })
+        }
       } else {
         setMessage({ type: 'error', text: 'Login failed. Please try again.' })
       }

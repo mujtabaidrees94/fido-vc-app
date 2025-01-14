@@ -58,9 +58,15 @@ export const handleLoginFinish = async (req: Request, res: Response, next: NextF
         }
 
         // @ts-ignore
-        const user = await userService.getUserById(dbCredential.userID);
-        if (!user) {
+        const { username } = await userService.getUserById(dbCredential.userID);
+        if (!username) {
             return next(new CustomError('User not found', 404));
+        }
+
+        // @ts-ignore
+        const { did } = await credentialService.getCredentialByUserId(dbCredential.userID);
+        if (!did) {
+            return next(new CustomError('User Keys not found', 404));
         }
 
         // @ts-ignore
@@ -85,7 +91,7 @@ export const handleLoginFinish = async (req: Request, res: Response, next: NextF
                 uint8ArrayToBase64(bodyCredIDBuffer),
                 authenticationInfo.newCounter
             );
-            res.send({verified: true});
+            res.send({verified: true, username, did});
         } else {
             next(new CustomError('Verification failed', 400));
         }

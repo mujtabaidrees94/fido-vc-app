@@ -3,11 +3,11 @@ import type {AuthenticatorDevice} from '@simplewebauthn/typescript-types';
 
 
 export const credentialService = {
-    async saveNewCredential(userId: string, credentialId: string, publicKey: string, counter: number, transports: string) {
+    async saveNewCredential(userId: string, credentialId: string, publicKey: string, did: string, counter: number, transports: string) {
         try {
             await promisePool.query(
-                'INSERT INTO credentials (user_id, credential_id, public_key, counter, transports) VALUES (?, ?, ?, ?, ?)',
-                [userId, credentialId, publicKey, counter, transports]
+                'INSERT INTO credentials (user_id, credential_id, public_key, did, counter, transports) VALUES (?, ?, ?, ?, ?, ?)',
+                [userId, credentialId, publicKey, did, counter, transports]
             );
         } catch (error) {
             console.error('Error saving new credential:', error);
@@ -33,6 +33,12 @@ export const credentialService = {
             console.error('Error retrieving credential:', error);
             throw error;
         }
+    },
+
+    async getCredentialByUserId(userId: string) {
+        const [rows] = await promisePool.query('SELECT * FROM credentials WHERE user_id = ?', [userId]);
+        // @ts-ignore
+        return rows[0];
     },
 
     async updateCredentialCounter(credentialId: string, newCounter: number) {

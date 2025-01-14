@@ -9,11 +9,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Checkbox } from "@/components/ui/checkbox"
 import { LogOut, Download, Upload, Lock } from 'lucide-react'
+import { useRouter } from 'next/navigation';
+
 
 // Mock patient data
 const patientData = {
-  username: "john.doe",
-  did: "did:example:123456789abcdefghi",
+  username: localStorage.getItem('loginUsername'),
+  did: localStorage.getItem('loginDid'),
   records: [
     { id: 1, name: "Blood Type", value: "A+" },
     { id: 2, name: "Allergies", value: "Peanuts, Penicillin" },
@@ -29,10 +31,13 @@ export default function PatientRecords() {
   const [uploadedCredential, setUploadedCredential] = useState<Record<string, any> | null>(null)
   const [selectedAttributes, setSelectedAttributes] = useState<string[]>([])
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
+  const router = useRouter();
 
   const handleLogout = () => {
     // Implement logout logic here
     console.log("Logging out...")
+    router.push('/');
+    
   }
 
   const generateVerifiableCredential = () => {
@@ -144,7 +149,7 @@ export default function PatientRecords() {
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 mt-12">
       <Card className="w-full">
         <CardHeader>
           <CardTitle>Patient Records</CardTitle>
