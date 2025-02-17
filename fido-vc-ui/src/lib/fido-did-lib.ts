@@ -27,5 +27,5 @@ function base64URLToUint8Array(base64UrlString: string): Uint8Array {
 
 export function encodePublicKeyToDID(publicKey: string): string {
 // Simplified example for Base58 encoding (you might need a library like `bs58`):
-return `did:key:${bs58.encode(base64URLToUint8Array(publicKey))}`;
+return `did:fido:${bs58.encode(base64URLToUint8Array(publicKey))}`;
 }
